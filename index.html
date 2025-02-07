@@ -5,69 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stretch Timer</title>
     <style>
-        :root {
-            --bg-color: white;
-            --text-color: black;
-            --button-color: #007BFF;
-        }
-        
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: white;
-            --button-color: #1E90FF;
-        }
-        
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: var(--bg-color);
-            color: var(--text-color);
             padding: 50px;
-            transition: background-color 0.5s, color 0.5s;
         }
-        
         #timer {
             font-size: 48px;
             font-weight: bold;
-            transition: transform 0.2s ease-in-out;
         }
-        
         button {
             margin: 10px;
             padding: 10px 20px;
             font-size: 18px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.3s;
         }
-        
-        button:hover {
-            transform: scale(1.1);
-        }
-        
         input[type="range"] {
             width: 300px;
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 20px;
-            }
-            #timer {
-                font-size: 36px;
-            }
-            button {
-                font-size: 16px;
-            }
         }
     </style>
 </head>
 <body>
+
     <h1>Stretch Timer</h1>
-    <button onclick="toggleTheme()">Toggle Light/Dark Mode</button>
     <div id="timer">30</div>
     
     <label for="duration">Duration: <span id="durationDisplay">30</span> sec</label><br>
@@ -98,15 +57,19 @@
 
         window.onload = function () {
             alertSound = document.getElementById('alertSound');
+
+            // Unlock sound by playing it muted first
             alertSound.volume = 0;
-            alertSound.src = "beep.wav";
+            alertSound.src = "beep.wav"; // Default sound
             alertSound.play().then(() => {
+                console.log("Sound unlocked.");
                 alertSound.pause();
                 alertSound.currentTime = 0;
-                alertSound.volume = 1;
+                alertSound.volume = 1; // Restore volume
             }).catch(error => {
                 console.log("Audio unlock failed:", error);
             });
+
             document.getElementById('testButton').addEventListener('click', playSound);
         };
 
@@ -119,12 +82,9 @@
 
         function startTimer() {
             if (interval) clearInterval(interval);
+
             interval = setInterval(() => {
                 document.getElementById('timer').textContent = timeLeft;
-                document.getElementById('timer').style.transform = "scale(1.2)";
-                setTimeout(() => {
-                    document.getElementById('timer').style.transform = "scale(1)";
-                }, 200);
                 if (timeLeft === 0) {
                     playSound();
                     timeLeft = duration;
@@ -143,6 +103,7 @@
             let selectedSound = document.getElementById('sound').value;
             alertSound.src = selectedSound;
             alertSound.load();
+
             alertSound.play().then(() => {
                 console.log("Sound played successfully");
             }).catch(error => {
@@ -150,10 +111,7 @@
                 alert("Your browser blocked autoplay. Click Start first!");
             });
         }
-
-        function toggleTheme() {
-            document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
-        }
     </script>
+
 </body>
 </html>
