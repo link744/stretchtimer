@@ -58,6 +58,18 @@
         window.onload = function () {
             alertSound = document.getElementById('alertSound');
 
+            // Unlock sound by playing it muted first
+            alertSound.volume = 0;
+            alertSound.src = "beep.wav"; // Default sound
+            alertSound.play().then(() => {
+                console.log("Sound unlocked.");
+                alertSound.pause();
+                alertSound.currentTime = 0;
+                alertSound.volume = 1; // Restore volume
+            }).catch(error => {
+                console.log("Audio unlock failed:", error);
+            });
+
             document.getElementById('testButton').addEventListener('click', playSound);
         };
 
