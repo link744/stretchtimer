@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stretch Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #timer {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        input[type="range"] {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Stretch Timer</h1>
+    <div id="timer">30</div>
+    
+    <label for="duration">Duration: <span id="durationDisplay">30</span> sec</label><br>
+    <input type="range" id="duration" min="10" max="300" value="30" step="1" oninput="updateDuration()">
+
+    <br><br>
+    
+    <label for="sound">Select Sound:</label>
+    <select id="sound">
+        <option value="beep-07.wav">Beep</option>
+        <option value="beep-09.wav">Chime</option>
+        <option value="beep-10.wav">Alarm</option>
+    </select>
+
+    <br><br>
+
+    <button onclick="startTimer()">Start</button>
+    <button onclick="stopTimer()">Stop</button>
+    <button id="testButton">Test Sound</button>
+
+    <audio id="alertSound" preload="auto"></audio>
+
+    <script>
+        let timeLeft = 30;
+        let interval;
+        let duration = 30;
+        let alertSound;
+
+        window.onload = function () {
+            alertSound = document.getElementById('alertSound');
+
+            document.getElementById('testButton').addEventListener('click', playSound);
+        };
+
+        function updateDuration() {
+            duration = document.getElementById('duration').value;
+            document.getElementById('durationDisplay').textContent = duration;
+            timeLeft = duration;
+            document.getElementById('timer').textContent = timeLeft;
+        }
+
+        function startTimer() {
+            if (interval) clearInterval(interval);
+
+            interval = setInterval(() => {
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft === 0) {
+                    playSound();
+                    timeLeft = duration;
+                } else {
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(interval);
+            interval = null;
+        }
+
+        function playSound() {
+            let selectedSound = document.getElementById('sound').value;
+            alertSound.src = selectedSound;
+            alertSound.load();
+
+            alertSound.play().then(() => {
+                console.log("Sound played successfully");
+            }).catch(error => {
+                console.log("Audio play failed:", error);
+                alert("Your browser blocked autoplay. Click Start first!");
+            });
+        }
+    </script>
+
+</body>
+</html>
