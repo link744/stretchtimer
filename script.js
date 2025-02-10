@@ -10,12 +10,31 @@ let countdown;
 let timerDuration = parseInt(timeSlider.value, 10);
 let wakeLock = null; // Used to prevent screen dimming on iOS
 
+
+
+//plays an empty sound upon page load
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+        const silentSource = audioContext.createBufferSource();
+        silentSource.buffer = silentBuffer;
+        silentSource.connect(audioContext.destination);
+        silentSource.start(0);
+        console.log("Silent sound played to unlock audio.");
+    } catch (error) {
+        console.log("Silent unlock failed:", error);
+    }
+});
+
 //added this new to intitialize autdio after a user tap 
 document.addEventListener("click", async () => {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     await audioContext.resume(); // Ensure Web Audio API is enabled
     console.log("Audio Context Resumed"); 
 }, { once: true });
+
+
 
 
 // Update timer display when slider changes
