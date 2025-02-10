@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -69,6 +69,11 @@
     <h1>Stretch Timer</h1>
     <button onclick="toggleTheme()">Toggle Light/Dark Mode</button>
     <div id="timer">30</div>
+
+    <div id="scrollArea" style="width:1px; height:1px; overflow:auto; position:absolute; top:-100px;">
+    <div style="height:200px;"></div>
+    </div>
+
     
     <label for="duration">Duration: <span id="durationDisplay">30</span> sec</label><br>
     <input type="range" id="duration" min="10" max="300" value="30" step="1" oninput="updateDuration()">
