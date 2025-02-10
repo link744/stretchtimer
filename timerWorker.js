@@ -28,3 +28,9 @@ worker.onmessage = function(e) {
     }
 };
 
+document.addEventListener("DOMContentLoaded", () => {
+    let silentAudio = new Audio();
+    silentAudio.muted = true;
+    silentAudio.play().catch(error => console.log("Silent play failed:", error));
+});
+
