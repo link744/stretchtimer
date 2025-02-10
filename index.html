@@ -121,21 +121,7 @@
         function stopTimer() {
             if (worker) worker.terminate();
         }
-        <!--
-        function playSound() {
-            let alertSound = document.getElementById('alertSound');
-            let selectedSound = document.getElementById('sound').value;
-            
-            alertSound.src = selectedSound;
-            alertSound.muted = true; // Play silently first
-            alertSound.play().then(() => {
-                alertSound.muted = false; // Unmute when playing
-                console.log("Sound played successfully");
-            }).catch(error => {
-                console.log("Audio play failed:", error);
-            });
-        }
-        -->
+
         let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound() {
