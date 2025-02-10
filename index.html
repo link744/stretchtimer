@@ -1,155 +1,23 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stretch Timer</title>
-    <style>
-        :root {
-            --bg-color: white;
-            --text-color: black;
-            --button-color: #007BFF;
-        }
-        
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: white;
-            --button-color: #1E90FF;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 50px;
-            transition: background-color 0.5s, color 0.5s;
-        }
-        
-        #timer {
-            font-size: 48px;
-            font-weight: bold;
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.3s;
-        }
-        
-        button:hover {
-            transform: scale(1.1);
-        }
-        
-        input[type="range"] {
-            width: 300px;
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 20px;
-            }
-            #timer {
-                font-size: 36px;
-            }
-            button {
-                font-size: 16px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Stretch Timer</h1>
-    <button onclick="toggleTheme()">Toggle Light/Dark Mode</button>
-    <div id="timer">30</div>
-
-    <div id="scrollArea" style="width:1px; height:1px; overflow:auto; position:absolute; top:-100px;">
-    <div style="height:200px;"></div>
+    <div class="container">
+        <h1>Stretch Timer</h1>
+        <div id="animation-container">
+            <div id="stretching-man"></div>
+        </div>
+        <p>Timer: <span id="timerDisplay">30</span> seconds</p>
+        <input type="range" id="timerSlider" min="10" max="100" value="30">
+        <button onclick="startTimer()">Start</button>
+        <button onclick="stopTimer()">Stop</button>
+        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     </div>
-
-    
-    <label for="duration">Duration: <span id="durationDisplay">30</span> sec</label><br>
-    <input type="range" id="duration" min="10" max="300" value="30" step="1" oninput="updateDuration()">
-
-    <br><br>
-    
-    <label for="sound">Select Sound:</label>
-    <select id="sound">
-        <option value="beep.wav">Beep</option>
-        <option value="chime.wav">Chime</option>
-        <option value="alarm.wav">Alarm</option>
-    </select>
-
-    <button onclick="unlockAudio()">Enable Sound</button>
-
-    <br><br>
-
-    <button onclick="startTimer()">Start</button>
-    <button onclick="stopTimer()">Stop</button>
-    <button id="testButton">Test Sound</button>
-
-    <audio id="alertSound" preload="auto"></audio>
-
-    <script>
-        let worker;
-        let alertSound = document.getElementById('alertSound');
-        
-        function updateDuration() {
-            let duration = document.getElementById('duration').value;
-            document.getElementById('durationDisplay').textContent = duration;
-            document.getElementById('timer').textContent = duration;
-        }
-
-        function startTimer() {
-            if (worker) worker.terminate();
-            let duration = parseInt(document.getElementById('duration').value, 10);
-            document.getElementById('timer').textContent = duration;
-            worker = new Worker('timerWorker.js');
-            worker.postMessage({ action: 'start', duration: duration });
-            worker.onmessage = function(e) {
-                if (e.data.timeLeft !== undefined) {
-                    document.getElementById('timer').textContent = e.data.timeLeft;
-                }
-                if (e.data.playSound) {
-                    playSound();
-                }
-            };
-        }
-
-        function stopTimer() {
-            if (worker) worker.terminate();
-        }
-
-        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playSound() {
-        let soundFile = document.getElementById('sound').value;
-
-            fetch(soundFile)
-                .then(response => response.arrayBuffer())
-                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-                .then(audioBuffer => {
-                    let source = audioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.connect(audioContext.destination);
-                    source.start(0);
-                })
-                .catch(error => console.log("Web Audio API error:", error));
-        }
-
-
-
-
-        function toggleTheme() {
-            document.body.dataset.theme = document.body.dataset.theme === "dark" ? "light" : "dark";
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
