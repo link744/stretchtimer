@@ -72,13 +72,23 @@ function releaseWakeLock() {
     }
 }
 
-function startTimer() {
-    requestWakeLock(); // Prevent screen from dimming
-    worker.postMessage({ action: "start", duration: timerDuration });
+function preventScreenLock() {
+    setInterval(() => {
+        window.dispatchEvent(new Event('touchstart'));
+        window.dispatchEvent(new Event('touchend'));
+    }, 29000); // Refresh touch event every ~29 seconds
 }
 
-function stopTimer() {
-    releaseWakeLock(); // Allow screen to dim when stopping
-    worker.postMessage({ action: "stop" });
+
+function preventScreenLock() {
+    setInterval(() => {
+        window.dispatchEvent(new Event('touchstart'));
+        window.dispatchEvent(new Event('touchend'));
+    }, 29000); // Refresh touch event every ~29 seconds
+}
+
+function startTimer() {
+    preventScreenLock(); // Simulate user interaction to prevent screen dimming
+    worker.postMessage({ action: "start", duration: timerDuration });
 }
 
