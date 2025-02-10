@@ -88,7 +88,23 @@ function preventScreenLock() {
 }
 
 function startTimer() {
-    preventScreenLock(); // Simulate user interaction to prevent screen dimming
+    preventScreenDimming(); // Keep screen active with scrolling trick
     worker.postMessage({ action: "start", duration: timerDuration });
 }
+
+
+function preventScreenDimming() {
+    let scrollArea = document.getElementById("scrollArea");
+    let direction = 1;
+    
+    setInterval(() => {
+        if (scrollArea) {
+            scrollArea.scrollTop += direction;
+            direction *= -1; // Reverse direction each time
+        }
+    }, 25000); // Adjust timing if needed
+}
+
+
+
 
