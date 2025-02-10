@@ -10,6 +10,14 @@ let countdown;
 let timerDuration = parseInt(timeSlider.value, 10);
 let wakeLock = null; // Used to prevent screen dimming on iOS
 
+//added this new to intitialize autdio after a user tap 
+document.addEventListener("click", async () => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    await audioContext.resume(); // Ensure Web Audio API is enabled
+    console.log("Audio Context Resumed"); 
+}, { once: true });
+
+
 // Update timer display when slider changes
 timeSlider.addEventListener("input", () => {
     timerDuration = parseInt(timeSlider.value, 10);
