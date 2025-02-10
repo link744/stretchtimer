@@ -14,17 +14,25 @@ function unlockAudio() {
         audioContext.resume().then(() => {
             console.log("Audio unlocked!");
             unlocked = true;
-            document.getElementById("enableSoundBtn").remove(); // Remove button after activation
+            const enableSoundBtn = document.getElementById("enableSoundBtn");
+            if (enableSoundBtn) {
+                enableSoundBtn.remove(); // Remove button after activation
+            }
+        }).catch(error => {
+            console.error("Error resuming audio context:", error);
         });
     }
 }
 
 // Function to play the selected sound
 async function playSound() {
-    if (!unlocked) return; // Prevent playback until audio is unlocked
+    if (!unlocked) {
+        console.warn("Sound is blocked until user interacts.");
+        return;
+    }
 
     try {
-        const response = await fetch(soundSelect.value);
+        const response = await fetch(document.getElementById("soundSelect").value);
         const arrayBuffer = await response.arrayBuffer();
         const buffer = await audioContext.decodeAudioData(arrayBuffer);
         const source = audioContext.createBufferSource();
@@ -32,7 +40,7 @@ async function playSound() {
         source.connect(audioContext.destination);
         source.start(0);
     } catch (error) {
-        console.log("Web Audio API playback error:", error);
+        console.error("Web Audio API playback error:", error);
     }
 }
 
@@ -49,12 +57,11 @@ function startTimer() {
     timer = setInterval(() => {
         if (timeLeft > 0) {
             timeLeft--;
-            updateTimerDisplay();
         } else {
             playSound(); // Play sound when timer reaches zero
             timeLeft = parseInt(document.getElementById("time-slider").value); // Reset timer
-            updateTimerDisplay();
         }
+        updateTimerDisplay();
     }, 1000);
 }
 
@@ -70,8 +77,9 @@ function updateTime(event) {
     updateTimerDisplay();
 }
 
-// Add "Enable Sound" button on page load
+// Ensure DOM is fully loaded before attaching event listeners
 document.addEventListener("DOMContentLoaded", () => {
+    // Create and add "Enable Sound" button
     const enableSoundBtn = document.createElement("button");
     enableSoundBtn.id = "enableSoundBtn";
     enableSoundBtn.textContent = "Enable Sound";
@@ -80,11 +88,13 @@ document.addEventListener("DOMContentLoaded", () => {
     enableSoundBtn.style.right = "20px";
     enableSoundBtn.style.zIndex = "1000";
     document.body.appendChild(enableSoundBtn);
-
     enableSoundBtn.addEventListener("click", unlockAudio);
 
+    // Attach event listeners to buttons and slider
     document.getElementById("start-button").addEventListener("click", startTimer);
     document.getElementById("stop-button").addEventListener("click", stopTimer);
     document.getElementById("time-slider").addEventListener("input", updateTime);
+
+    // Initial timer display update
     updateTimerDisplay();
 });
