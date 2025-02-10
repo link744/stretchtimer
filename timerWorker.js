@@ -18,3 +18,13 @@ self.onmessage = function(e) {
 self.onclose = function() {
     clearInterval(interval);
 };
+
+worker.onmessage = function(e) {
+    if (e.data.timeLeft !== undefined) {
+        document.getElementById('timer').textContent = e.data.timeLeft;
+    }
+    if (e.data.playSound) {
+        playSound(); // This should be inside the main script, not the worker
+    }
+};
+
