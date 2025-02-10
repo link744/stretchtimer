@@ -9,22 +9,35 @@
 <body>
     <div class="container">
         <h1>Stretch Timer</h1>
-        <div id="animation-container">
-            <div id="stretching-man"></div>
+
+        <!-- Timer Display -->
+        <div id="timer">30</div>
+
+        <!-- Slider to Adjust Countdown Time -->
+        <label for="timeSlider">Set Time (10s - 100s):</label>
+        <input type="range" id="timeSlider" min="10" max="100" value="30">
+
+        <!-- Start & Stop Buttons -->
+        <button id="startBtn">Start</button>
+        <button id="stopBtn">Stop</button>
+
+        <!-- Sound Selection -->
+        <label for="soundSelect">Select Sound:</label>
+        <select id="soundSelect">
+            <option value="beep.wav">Beep</option>
+            <option value="chime.wav">Chime</option>
+            <option value="alarm.wav">Alarm</option>
+        </select>
+
+        <!-- Dark Mode Toggle -->
+        <button id="darkModeToggle">Toggle Dark Mode</button>
+
+        <!-- Stretching Animation -->
+        <div class="stretch-animation">
+            <img src="stretching.gif" alt="Stretching Animation">
         </div>
-        <p>Timer: <span id="timerDisplay">30</span> seconds</p>
-        <input type="range" id="timerSlider" min="10" max="100" value="30">
-        <button onclick="startTimer()">Start</button>
-        <button onclick="stopTimer()">Stop</button>
-        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     </div>
-    
-    <!-- Hidden scroll area to prevent screen dimming on iOS -->
-    <div id="scrollArea" style="width:1px; height:1px; overflow:auto; position:absolute; top:-100px;">
-        <div style="height:200px;"></div>
-    </div>
-    
-    <audio id="beepSound" src="beep.wav"></audio>
+
     <script src="script.js"></script>
 </body>
 </html>
