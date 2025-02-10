@@ -34,3 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
     silentAudio.play().catch(error => console.log("Silent play failed:", error));
 });
 
+function unlockAudio() {
+    let alertSound = document.getElementById('alertSound');
+    alertSound.src = "beep.wav"; // Any valid sound file
+    alertSound.play().then(() => {
+        console.log("Audio unlocked");
+    }).catch(error => {
+        console.log("Unlock failed:", error);
+    });
+}
+
