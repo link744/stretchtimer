@@ -1,134 +1,90 @@
-// Select elements
-const timerDisplay = document.getElementById("timer");
-const timeSlider = document.getElementById("timeSlider");
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const soundSelect = document.getElementById("soundSelect");
-const darkModeToggle = document.getElementById("darkModeToggle");
+let audioContext;
+let unlocked = false;
+let timer;
+let timeLeft = 30; // Default timer value
+let isRunning = false;
 
-let countdown;
-let timerDuration = parseInt(timeSlider.value, 10);
-let wakeLock = null; // Used to prevent screen dimming on iOS
-
-
-
-//plays an empty sound upon page load
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
+// Function to initialize Web Audio API with user interaction
+function unlockAudio() {
+    if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const silentBuffer = audioContext.createBuffer(1, 1, 22050);
-        const silentSource = audioContext.createBufferSource();
-        silentSource.buffer = silentBuffer;
-        silentSource.connect(audioContext.destination);
-        silentSource.start(0);
-        console.log("Silent sound played to unlock audio.");
-    } catch (error) {
-        console.log("Silent unlock failed:", error);
     }
-});
 
-//added this new to intitialize autdio after a user tap 
-document.addEventListener("click", async () => {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    await audioContext.resume(); // Ensure Web Audio API is enabled
-    console.log("Audio Context Resumed"); 
-}, { once: true });
-
-
-
-
-// Update timer display when slider changes
-timeSlider.addEventListener("input", () => {
-    timerDuration = parseInt(timeSlider.value, 10);
-    timerDisplay.textContent = timerDuration;
-});
-
-// Function to start the countdown
-function startTimer() {
-    let timeLeft = timerDuration;
-
-    // Prevent screen dimming
-    requestWakeLock();
-
-    countdown = setInterval(() => {
-        if (timeLeft > 0) {
-            timeLeft--;
-            timerDisplay.textContent = timeLeft;
-        } else {
-            playSound(); // Play sound when timer reaches 0
-            timeLeft = timerDuration; // Reset timer
-        }
-    }, 1000);
-
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-}
-
-// Function to stop the countdown
-function stopTimer() {
-    clearInterval(countdown);
-    releaseWakeLock();
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
+    if (audioContext.state === "suspended") {
+        audioContext.resume().then(() => {
+            console.log("Audio unlocked!");
+            unlocked = true;
+            document.getElementById("enableSoundBtn").remove(); // Remove button after activation
+        });
+    }
 }
 
 // Function to play the selected sound
-//function playSound() {
-//    const sound = new Audio(soundSelect.value);
-//    sound.play().catch(error => console.log("Audio playback error:", error));
-//}
-
 async function playSound() {
+    if (!unlocked) return; // Prevent playback until audio is unlocked
+
     try {
-        const response = await fetch(soundSelect.value); // Load the selected sound
+        const response = await fetch(soundSelect.value);
         const arrayBuffer = await response.arrayBuffer();
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const buffer = await audioContext.decodeAudioData(arrayBuffer);
         const source = audioContext.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContext.destination);
-
-        // Resume AudioContext if it was suspended (required for iOS Safari)
-        if (audioContext.state === "suspended") {
-            await audioContext.resume();
-        }
-
         source.start(0);
     } catch (error) {
         console.log("Web Audio API playback error:", error);
     }
 }
 
+// Function to update and display the timer
+function updateTimerDisplay() {
+    document.getElementById("timer-display").textContent = timeLeft;
+}
 
-// Toggle dark mode
-darkModeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-});
+// Function to start the countdown timer
+function startTimer() {
+    if (isRunning) return;
+    isRunning = true;
 
-// Prevent screen dimming/sleeping on iOS
-async function requestWakeLock() {
-    try {
-        if ("wakeLock" in navigator) {
-            wakeLock = await navigator.wakeLock.request("screen");
-            wakeLock.addEventListener("release", () => {
-                console.log("Wake Lock was released");
-                wakeLock = null;
-            });
+    timer = setInterval(() => {
+        if (timeLeft > 0) {
+            timeLeft--;
+            updateTimerDisplay();
+        } else {
+            playSound(); // Play sound when timer reaches zero
+            timeLeft = parseInt(document.getElementById("time-slider").value); // Reset timer
+            updateTimerDisplay();
         }
-    } catch (error) {
-        console.log("Wake Lock request failed:", error);
-    }
+    }, 1000);
 }
 
-// Release Wake Lock when timer stops
-function releaseWakeLock() {
-    if (wakeLock !== null) {
-        wakeLock.release().then(() => {
-            wakeLock = null;
-        });
-    }
+// Function to stop the countdown timer
+function stopTimer() {
+    clearInterval(timer);
+    isRunning = false;
 }
 
-// Attach event listeners
-startBtn.addEventListener("click", startTimer);
-stopBtn.addEventListener("click", stopTimer);
+// Function to update timer value from slider
+function updateTime(event) {
+    timeLeft = parseInt(event.target.value);
+    updateTimerDisplay();
+}
+
+// Add "Enable Sound" button on page load
+document.addEventListener("DOMContentLoaded", () => {
+    const enableSoundBtn = document.createElement("button");
+    enableSoundBtn.id = "enableSoundBtn";
+    enableSoundBtn.textContent = "Enable Sound";
+    enableSoundBtn.style.position = "fixed";
+    enableSoundBtn.style.bottom = "20px";
+    enableSoundBtn.style.right = "20px";
+    enableSoundBtn.style.zIndex = "1000";
+    document.body.appendChild(enableSoundBtn);
+
+    enableSoundBtn.addEventListener("click", unlockAudio);
+
+    document.getElementById("start-button").addEventListener("click", startTimer);
+    document.getElementById("stop-button").addEventListener("click", stopTimer);
+    document.getElementById("time-slider").addEventListener("input", updateTime);
+    updateTimerDisplay();
+});
