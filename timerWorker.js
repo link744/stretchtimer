@@ -44,3 +44,41 @@ function unlockAudio() {
     });
 }
 
+let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log("Wake Lock is active");
+            
+            // Auto-reacquire lock if it gets released
+            wakeLock.addEventListener('release', () => {
+                console.log("Wake Lock was released");
+                wakeLock = null;
+            });
+        }
+    } catch (err) {
+        console.log("Wake Lock error:", err);
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock !== null) {
+        wakeLock.release().then(() => {
+            console.log("Wake Lock released manually");
+            wakeLock = null;
+        });
+    }
+}
+
+function startTimer() {
+    requestWakeLock(); // Prevent screen from dimming
+    worker.postMessage({ action: "start", duration: timerDuration });
+}
+
+function stopTimer() {
+    releaseWakeLock(); // Allow screen to dim when stopping
+    worker.postMessage({ action: "stop" });
+}
+
