@@ -1,45 +1,12 @@
-let timer;
-let timeLeft = 30; // Default timer value
-let isRunning = false;
-
-// Function to update and display the timer
-function updateTimerDisplay() {
-    document.getElementById("timer-display").textContent = timeLeft;
-}
-
-// Function to start the countdown timer
-function startTimer() {
-    if (isRunning) return;
-    isRunning = true;
-
-    timer = setInterval(() => {
-        if (timeLeft > 0) {
-            timeLeft--;
-        } else {
-            timeLeft = parseInt(document.getElementById("time-slider").value); // Reset timer
-        }
-        updateTimerDisplay();
-    }, 1000);
-}
-
-// Function to stop the countdown timer
-function stopTimer() {
-    clearInterval(timer);
-    isRunning = false;
-}
-
-// Function to update timer value from slider
-function updateTime(event) {
-    timeLeft = parseInt(event.target.value);
-    updateTimerDisplay();
-}
-
-// Ensure DOM is fully loaded before attaching event listeners
+let timeLeft = 30;
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("start-button").addEventListener("click", startTimer);
-    document.getElementById("stop-button").addEventListener("click", stopTimer);
-    document.getElementById("time-slider").addEventListener("input", updateTime);
+    document.getElementById("timer-display").textContent = timeLeft;
 
-    // Initial timer display update
-    updateTimerDisplay();
+    document.getElementById("start-button").onclick = function() {
+        alert("Start button clicked!");
+    };
+
+    document.getElementById("stop-button").onclick = function() {
+        alert("Stop button clicked!");
+    };
 });
