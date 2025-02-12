@@ -4,40 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stretch Timer</title>
+    
+    <!-- Link to external CSS file -->
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Ensure script loads after HTML -->
+    <script defer src="script.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Stretch Timer</h1>
+    <h1>Stretch Timer</h1>
 
-        <!-- Timer Display -->
-        <div id="timer">30</div>
+    <!-- Timer display -->
+    <p id="timer-display">30</p>
 
-        <!-- Slider to Adjust Countdown Time -->
-        <label for="timeSlider">Set Time (10s - 100s):</label>
-        <input type="range" id="timeSlider" min="10" max="100" value="30">
+    <!-- Slider to adjust timer (10 to 100 seconds) -->
+    <input type="range" id="time-slider" min="10" max="100" value="30">
+    
+    <!-- Buttons to start/stop the timer -->
+    <button id="start-button">Start</button>
+    <button id="stop-button">Stop</button>
 
-        <!-- Start & Stop Buttons -->
-        <button id="startBtn">Start</button>
-        <button id="stopBtn">Stop</button>
+    <!-- Button to switch between light and dark mode -->
+    <button id="theme-toggle">Toggle Light/Dark Mode</button>
 
-        <!-- Sound Selection -->
-        <label for="soundSelect">Select Sound:</label>
-        <select id="soundSelect">
-            <option value="beep.wav">Beep</option>
-            <option value="chime.wav">Chime</option>
-            <option value="alarm.wav">Alarm</option>
-        </select>
+    <!-- Button to test sound manually -->
+    <button id="test-sound">Test Sound</button>
 
-        <!-- Dark Mode Toggle -->
-        <button id="darkModeToggle">Toggle Dark Mode</button>
-
-        <!-- Stretching Animation -->
-        <div class="stretch-animation">
-            <img src="stretching.gif" alt="Stretching Animation">
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+    <!-- Hidden audio elements for sound -->
+    <audio id="beep-sound" src="beep.wav" preload="auto"></audio>
 </body>
 </html>
