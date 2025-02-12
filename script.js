@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let testSoundButton = document.getElementById("test-sound");
     let beepSound = document.getElementById("beep-sound");
 
-    // Ensure all elements exist before proceeding
+    // Debugging: Check if elements exist
     if (!timerDisplay || !timeSlider || !startButton || !stopButton || !themeToggle || !testSoundButton || !beepSound) {
         console.error("One or more elements are missing in the document.");
         return;
@@ -25,10 +25,12 @@ document.addEventListener("DOMContentLoaded", function () {
     timeSlider.addEventListener("input", function () {
         timeLeft = parseInt(this.value, 10);
         timerDisplay.textContent = timeLeft;
+        console.log("Slider updated: " + timeLeft);
     });
 
     // Function to start the countdown
     function startTimer() {
+        console.log("Timer started");
         clearInterval(countdown); // Ensure no multiple timers
 
         countdown = setInterval(function () {
@@ -52,18 +54,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to stop the timer
     function stopTimer() {
+        console.log("Timer stopped");
         clearInterval(countdown);
     }
 
     // Function to play the beep sound
     function playSound() {
+        console.log("Playing sound...");
         beepSound.currentTime = 0; // Reset audio position
-        beepSound.play().catch(error => console.error("Audio play failed:", error));
+        beepSound.play()
+            .then(() => console.log("Sound played successfully"))
+            .catch(error => console.error("Audio play failed:", error));
     }
 
     // Function to toggle between light and dark mode
     function toggleTheme() {
         document.body.classList.toggle("dark-mode");
+        console.log("Theme toggled");
     }
 
     // Event listeners for buttons
@@ -80,7 +87,9 @@ document.addEventListener("DOMContentLoaded", function () {
         hiddenElement.muted = true;
         hiddenElement.style.display = "none";
         document.body.appendChild(hiddenElement);
-        hiddenElement.play().catch(error => console.error("Video play failed:", error));
+        hiddenElement.play()
+            .then(() => console.log("Video playing to prevent screen dimming"))
+            .catch(error => console.error("Video play failed:", error));
     }
 
     preventScreenDimming(); // Call function when page loads
