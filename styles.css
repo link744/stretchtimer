@@ -1,49 +1,105 @@
-/* Default light mode */
+/* General styling */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: white;
-    color: black;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent scrolling */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-/* Dark mode styles */
+/* Dark mode */
 body.dark-mode {
-    background-color: black;
-    color: white;
+    background-color: #222;
+    color: #fff;
 }
 
-/* Timer Display */
-#timer {
-    font-size: 4rem;
-    margin: 20px 0;
+/* Header */
+h1 {
+    font-size: 2.5rem; /* Bigger title */
+    margin-bottom: 20px;
 }
 
-/* Slider Styling */
-#timeSlider {
-    width: 80%;
+/* Timer display */
+p {
+    font-size: 2rem;
     margin: 10px 0;
 }
 
-/* Button Styling */
-button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
+/* Slider */
+input[type="range"] {
+    width: 90%; /* Full width on mobile */
+    max-width: 400px;
+    margin: 20px auto;
+    display: block;
 }
 
-/* Stretching Animation */
-.stretch-animation {
+/* Buttons */
+button {
+    font-size: 1.5rem; /* Bigger buttons */
+    padding: 15px 25px;
+    margin: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Button colors */
+#start-button {
+    background-color: #28a745;
+    color: white;
+}
+
+#stop-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+#theme-toggle {
+    background-color: #007bff;
+    color: white;
+}
+
+#test-sound {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Button hover effects */
+button:hover {
+    opacity: 0.8;
+}
+
+/* Stretching GIF */
+#stretch-gif {
+    width: 150px; /* Resize for mobile */
+    height: auto;
     margin-top: 20px;
 }
 
-.stretch-animation img {
-    width: 150px;
-    height: auto;
-    animation: stretchMove 1.5s infinite alternate ease-in-out;
-}
+/* Responsive styles */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+    }
 
-@keyframes stretchMove {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-20px); }
+    p {
+        font-size: 1.8rem;
+    }
+
+    button {
+        font-size: 1.3rem;
+        padding: 12px 20px;
+    }
+
+    #stretch-gif {
+        width: 120px; /* Smaller GIF on mobile */
+    }
 }
