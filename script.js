@@ -10,9 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let themeToggle = document.getElementById("theme-toggle");
     let testSoundButton = document.getElementById("test-sound");
     let beepSound = document.getElementById("beep-sound");
+    let stretchGif = document.getElementById("stretch-gif"); // Added GIF reference
 
     // Debugging: Check if elements exist
-    if (!timerDisplay || !timeSlider || !startButton || !stopButton || !themeToggle || !testSoundButton || !beepSound) {
+    if (!timerDisplay || !timeSlider || !startButton || !stopButton || !themeToggle || !testSoundButton || !beepSound || !stretchGif) {
         console.error("One or more elements are missing in the document.");
         return;
     }
@@ -20,6 +21,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let countdown;
     let timeLeft = parseInt(timeSlider.value, 10); // Default time from slider
     timerDisplay.textContent = timeLeft; // Display initial time
+
+    // Hide GIF initially
+    stretchGif.style.display = "none";
 
     // Update time display when slider is moved
     timeSlider.addEventListener("input", function () {
@@ -32,6 +36,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function startTimer() {
         console.log("Timer started");
         clearInterval(countdown); // Ensure no multiple timers
+
+        stretchGif.style.display = "block"; // Show GIF when timer starts
 
         countdown = setInterval(function () {
             if (timeLeft > 0) {
@@ -56,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function stopTimer() {
         console.log("Timer stopped");
         clearInterval(countdown);
+        stretchGif.style.display = "none"; // Hide GIF when timer stops
     }
 
     // Function to play the beep sound
