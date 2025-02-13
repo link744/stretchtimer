@@ -87,4 +87,26 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.log("Playing sound...");
         beepSound.currentTime = 0;
         beepSound.play()
-            .then(() => console.log(
+            .then(() => console.log("Sound played successfully"))
+            .catch(error => console.error("Audio play failed:", error));
+    }
+
+    // Function to toggle between light and dark mode
+    function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+        console.log("Theme toggled");
+    }
+
+    // Event listeners for buttons
+    startButton.addEventListener("click", startTimer);
+    stopButton.addEventListener("click", stopTimer);
+    themeToggle.addEventListener("click", toggleTheme);
+    testSoundButton.addEventListener("click", playSound);
+
+    // Update time display when slider is moved
+    timeSlider.addEventListener("input", function () {
+        timeLeft = parseInt(this.value, 10);
+        timerDisplay.textContent = timeLeft;
+        console.log("Slider updated: " + timeLeft);
+    });
+});
