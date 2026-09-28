@@ -11,22 +11,41 @@
 
     <div>
         <p>Time Remaining: <span id="timer-display">30</span> seconds</p>
-        <input type="range" id="time-slider" min="10" max="100" value="30">
+        <input type="range" id="time-slider" min="10" max="100" step="5" value="30">
+        <div class="presets">
+            <button class="preset" data-seconds="15">15s</button>
+            <button class="preset" data-seconds="30">30s</button>
+            <button class="preset" data-seconds="60">60s</button>
+            <button class="preset" data-seconds="90">90s</button>
+        </div>
     </div>
 
     <div>
         <button id="start-button">Start</button>
         <button id="stop-button">Stop</button>
-        <button id="theme-toggle">Toggle Light/Dark Mode</button>
+        <button id="sound-toggle">🔊 Sound On</button>
+        <button id="theme-toggle">🌙 Dark Mode</button>
         <button id="test-sound">Test Sound</button>
     </div>
+
+    <p class="hint">Tip: press Space to start/stop</p>
 
     <!-- Stretching animation GIF -->
     <div>
         <img id="stretch-gif" src="stretching.gif" alt="Stretching Animation" style="display: none; width: 200px;">
     </div>
 
-    <audio id="beep-sound" src="beep.wav"></audio>
+    <!-- Alarm overlay -->
+    <div id="alarm-overlay" class="overlay" hidden>
+        <div class="overlay-content">
+            <div class="alarm-text">Stretch now!</div>
+            <div class="alarm-sub">Stand up, roll your shoulders, touch your toes</div>
+            <button id="dismiss-button">Done — Restart Timer</button>
+        </div>
+    </div>
+
+    <!-- Fallback audio path (Web Audio is the primary path) -->
+    <audio id="beep-sound" src="beep.wav" preload="auto"></audio>
 
     <script src="script.js"></script>
 </body>

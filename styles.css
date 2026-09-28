@@ -11,18 +11,19 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Dark mode */
 body.dark-mode {
-    background-color: #222;
+    background-color: #1b1f24;
     color: #fff;
 }
 
 /* Header */
 h1 {
-    font-size: 2.5rem; /* Bigger title */
+    font-size: 2.5rem;
     margin-bottom: 20px;
 }
 
@@ -32,23 +33,57 @@ p {
     margin: 10px 0;
 }
 
+/* Hint text */
+.hint {
+    font-size: 0.95rem;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
 /* Slider */
 input[type="range"] {
-    width: 90%; /* Full width on mobile */
+    width: 90%;
     max-width: 400px;
     margin: 20px auto;
     display: block;
+    accent-color: #28a745;
+}
+
+/* Preset chips */
+.presets {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 8px 0 4px;
+}
+
+.preset {
+    font-size: 1rem;
+    padding: 8px 16px;
+    margin: 0;
+    background-color: #5c7a1f;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.preset:hover {
+    background-color: #46601a;
+    transform: translateY(-1px);
 }
 
 /* Buttons */
 button {
-    font-size: 1.5rem; /* Bigger buttons */
+    font-size: 1.5rem;
     padding: 15px 25px;
-    margin: 10px;
+    margin: 8px 10px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, opacity 0.2s ease;
 }
 
 /* Button colors */
@@ -72,16 +107,81 @@ button {
     color: black;
 }
 
+#sound-toggle {
+    background-color: #6f42c1;
+    color: white;
+}
+
+#sound-toggle.muted {
+    background-color: #6c757d;
+}
+
 /* Button hover effects */
 button:hover {
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
 /* Stretching GIF */
 #stretch-gif {
-    width: 150px; /* Resize for mobile */
+    width: 150px;
     height: auto;
     margin-top: 20px;
+}
+
+/* Urgent countdown: pulse the GIF in the final seconds */
+#stretch-gif.urgent {
+    animation: urgentPulse 0.6s ease-in-out infinite;
+}
+
+@keyframes urgentPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.08); filter: drop-shadow(0 0 12px #ff3b3b); }
+}
+
+/* Alarm overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.overlay[hidden] {
+    display: none;
+}
+
+.overlay-content {
+    text-align: center;
+    color: #fff;
+    padding: 20px;
+}
+
+.alarm-text {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+    animation: alarmBlink 0.8s steps(1) infinite;
+}
+
+.alarm-sub {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 24px;
+}
+
+#dismiss-button {
+    background-color: #28a745;
+    color: #fff;
+    font-size: 1.4rem;
+    padding: 18px 30px;
+}
+
+@keyframes alarmBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
 }
 
 /* Responsive styles */
@@ -99,8 +199,11 @@ button:hover {
         padding: 12px 20px;
     }
 
+    .alarm-text {
+        font-size: 2.2rem;
+    }
+
     #stretch-gif {
-        width: 120px; /* Smaller GIF on mobile */
+        width: 120px;
     }
 }
-
