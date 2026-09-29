@@ -1,5 +1,6 @@
-// Stretch Timer — robust audio (Web Audio API, unlocked on user gesture)
-// plus deadline-based countdown that survives background-tab throttling.
+// Stretch Timer — loop mode: one beep at the end of each interval, then
+// immediately start counting down the next interval. No screen interaction
+// required — the beep tells you to change stretches, the countdown loops on.
 document.addEventListener("DOMContentLoaded", async function () {
     // Element references
     const timerDisplay = document.getElementById("timer-display");
@@ -11,24 +12,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     const soundToggle = document.getElementById("sound-toggle");
     const beepSound = document.getElementById("beep-sound");
     const stretchGif = document.getElementById("stretch-gif");
-    const alarmOverlay = document.getElementById("alarm-overlay");
-    const dismissButton = document.getElementById("dismiss-button");
     const presetButtons = document.querySelectorAll(".preset");
 
     // State
-    let ticker = null;          // requestAnimationFrame/interval handle
-    let deadline = null;       // absolute end time (Date.now() based)
+    let ticker = null;          // interval handle
+    let deadline = null;        // absolute end time (Date.now() based)
     let running = false;
     let timeLeft = parseInt(timeSlider.value, 10);
     let wakeLock = null;
     let soundEnabled = true;
-    let alarming = false;      // true while the stretch alarm is ringing
 
     // ---- Audio: Web Audio API (primary, always works after first gesture) ----
     let audioCtx = null;
-    let audioBuffer = null;    // decoded beep.wav
-    let alarmGain = null;
-    let alarmTimer = null;     // interval handle for the repeating alarm
+    let audioBuffer = null;     // decoded beep.wav
 
     // Create/resume the audio context. MUST be called from a user gesture
     // (click/keypress) — after that the browser lets us play at any time.
@@ -73,50 +69,16 @@ document.addEventListener("DOMContentLoaded", async function () {
         return true;
     }
 
-    // Start a repeating alarm (beep every 600ms) until stopAlarm() is called.
-    function startAlarm() {
-        stopAlarm();
-        if (!soundEnabled || !audioCtx || !audioBuffer) {
-            beepSound.loop = true;
-            beepSound.currentTime = 0;
-            beepSound.play().catch(() => { /* visual alarm still shows */ });
-            alarming = true;
-            return;
-        }
-        alarming = true;
-        alarmGain = audioCtx.createGain();
-        alarmGain.gain.value = 1;
-        alarmGain.connect(audioCtx.destination);
-        const tick = () => {
-            if (!alarming) return;
-            const src = audioCtx.createBufferSource();
-            src.buffer = audioBuffer;
-            src.connect(alarmGain);
-            src.start(0);
-        };
-        tick();
-        alarmTimer = setInterval(tick, 600);
-    }
-
-    function stopAlarm() {
-        alarming = false;
-        if (alarmTimer) { clearInterval(alarmTimer); alarmTimer = null; }
-        if (alarmGain && audioCtx) {
-            try { alarmGain.disconnect(); } catch (e) { /* noop */ }
-            alarmGain = null;
-        }
-        if (beepSound.loop) {
-            beepSound.loop = false;
-            beepSound.pause();
-        }
-    }
-
     // Fallback beep via <audio> if Web Audio failed.
     function fallbackBeep() {
-        if (!beepSound.loop) {
-            beepSound.currentTime = 0;
-            beepSound.play().catch(() => {});
-        }
+        beepSound.currentTime = 0;
+        beepSound.play().catch(() => { /* silent */ });
+    }
+
+    // The interval-end cue: exactly one beep (Web Audio, <audio> fallback).
+    function beepOnce() {
+        if (!soundEnabled) return;
+        if (!beepNow()) fallbackBeep();
     }
 
     // ---- Countdown: deadline-based so it is immune to timer throttling ----
@@ -140,17 +102,20 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    // Loop: one beep, then immediately start the next countdown.
     function onTimeUp() {
-        running = false;
-        if (ticker) { clearInterval(ticker); ticker = null; } // stop the countdown loop
-        stretchGif.style.display = "block";
-        alarmOverlay.hidden = false;
-        document.title = "Stretch now! — Stretch Timer";
-        if (soundEnabled) {
-            beepNow();                 // immediate first beep
-            startAlarm();              // then repeat until dismissed
-        }
-        requestWakeLock();            // keep screen on while stretching
+        beepOnce();
+        restartCountdown();
+    }
+
+    // Start (or restart) a fresh interval from the slider's value.
+    function restartCountdown() {
+        timeLeft = parseInt(timeSlider.value, 10);
+        running = true;
+        deadline = Date.now() + timeLeft * 1000;
+        renderTime();
+        if (!ticker) ticker = setInterval(tick, 250);
+        requestWakeLock();
     }
 
     async function requestWakeLock() {
@@ -174,10 +139,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     // ---- Timer controls ----
     function startTimer() {
         if (running) return;
-        timeLeft = parseInt(timeSlider.value, 10); // slider is the source of truth
         running = true;
-        stopAlarm();
-        alarmOverlay.hidden = true;
+        timeLeft = parseInt(timeSlider.value, 10); // slider is the source of truth
         deadline = Date.now() + timeLeft * 1000;
         stretchGif.style.display = "block";
         stretchGif.classList.add("running");
@@ -192,14 +155,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     function stopTimer() {
         running = false;
         if (ticker) { clearInterval(ticker); ticker = null; }
-        stopAlarm();
         deadline = null;
-        alarmOverlay.hidden = true;
         stretchGif.style.display = "none";
         stretchGif.classList.remove("running", "urgent");
         releaseWakeLock();
         document.removeEventListener("visibilitychange", onVisibility);
         document.title = "Stretch Timer";
+        timeLeft = parseInt(timeSlider.value, 10);
         renderTime();
     }
 
@@ -211,28 +173,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    function restartAfterStretch() {
-        // Alarm dismissed: go straight back into a fresh interval.
-        // timeLeft may be 0/1 from the countdown, so re-read the slider.
-        timeLeft = parseInt(timeSlider.value, 10);
-        stopAlarm();
-        alarmOverlay.hidden = true;
-        running = true;
-        deadline = Date.now() + timeLeft * 1000;
-        ticker = setInterval(tick, 250);
-        renderTime();
-        requestWakeLock();
-    }
-
     // ---- Sound toggle + test ----
     function setSound(on) {
         soundEnabled = on;
         soundToggle.textContent = on ? "🔊 Sound On" : "🔇 Sound Off";
         soundToggle.classList.toggle("muted", !on);
-        if (!on) {
-            stopAlarm();
-            beepSound.pause();
-        }
+        if (!on) beepSound.pause();
         try { localStorage.setItem("stretch-sound", on ? "1" : "0"); } catch (e) { /* private mode */ }
     }
 
@@ -290,7 +236,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         startTimer();
     });
     stopButton.addEventListener("click", stopTimer);
-    dismissButton.addEventListener("click", restartAfterStretch);
     testSoundButton.addEventListener("click", testSound);
     soundToggle.addEventListener("click", async () => {
         const on = !soundEnabled;

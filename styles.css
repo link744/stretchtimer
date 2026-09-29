@@ -138,52 +138,6 @@ button:hover {
     50%      { transform: scale(1.08); filter: drop-shadow(0 0 12px #ff3b3b); }
 }
 
-/* Alarm overlay */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
-
-.overlay[hidden] {
-    display: none;
-}
-
-.overlay-content {
-    text-align: center;
-    color: #fff;
-    padding: 20px;
-}
-
-.alarm-text {
-    font-size: 3rem;
-    font-weight: bold;
-    margin-bottom: 12px;
-    animation: alarmBlink 0.8s steps(1) infinite;
-}
-
-.alarm-sub {
-    font-size: 1.2rem;
-    opacity: 0.9;
-    margin-bottom: 24px;
-}
-
-#dismiss-button {
-    background-color: #28a745;
-    color: #fff;
-    font-size: 1.4rem;
-    padding: 18px 30px;
-}
-
-@keyframes alarmBlink {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.35; }
-}
-
 /* Responsive styles */
 @media (max-width: 600px) {
     h1 {
