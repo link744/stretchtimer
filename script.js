@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         soundToggle.classList.toggle("muted", !enabled);
         let savedChoice = null;
         try { savedChoice = localStorage.getItem("stretch-sound-choice"); } catch (e) { /* private mode */ }
-        selectedSoundId = (savedChoice && SOUNDS[savedChoice]) || DEFAULT_SOUND;
+        selectedSoundId = savedChoice && SOUNDS[savedChoice] ? savedChoice : DEFAULT_SOUND;
         if (soundPicker) {
             soundPicker.querySelectorAll(".sound-option").forEach(btn => {
                 btn.classList.toggle("active", btn.dataset.sound === selectedSoundId);
