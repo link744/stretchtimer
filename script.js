@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const testSoundButton = document.getElementById("test-sound");
     const soundToggle = document.getElementById("sound-toggle");
     const beepSound = document.getElementById("beep-sound");
+    const soundPicker = document.getElementById("sound-picker");
     const stretchGif = document.getElementById("stretch-gif");
     const presetButtons = document.querySelectorAll(".preset");
 
@@ -22,9 +23,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     let wakeLock = null;
     let soundEnabled = true;
 
+    // ---- Sounds: user-selectable (persisted alongside the enabled flag) ----
+    const SOUNDS = {
+        beep:   { name: "Nice Ding",        src: "beep.wav" },
+        chime: { name: "Bell (Long Tail)", src: "chime.wav" },
+        alarm: { name: "Alarm",            src: "alarm.wav" },
+    };
+    const DEFAULT_SOUND = "beep";
+    let selectedSoundId = DEFAULT_SOUND;
+
     // ---- Audio: Web Audio API (primary, always works after first gesture) ----
     let audioCtx = null;
-    let audioBuffer = null;     // decoded beep.wav
+    const audioBuffers = {};     // soundId -> decoded AudioBuffer (cached per sound)
 
     // Create/resume the audio context. MUST be called from a user gesture
     // (click/keypress) — after that the browser lets us play at any time.
@@ -37,18 +47,16 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const Ctx = window.AudioContext || window.webkitAudioContext;
                 if (!Ctx) return false;
                 audioCtx = new Ctx();
-                // Pre-decode beep.wav so playback never waits on the network.
-                if (!audioBuffer) {
-                    const res = await fetch("beep.wav");
-                    const arr = await res.arrayBuffer();
-                    audioBuffer = await audioCtx.decodeAudioData(arr);
-                }
             }
             if (audioCtx.state === "suspended") {
                 await Promise.race([
                     audioCtx.resume(),
                     new Promise(r => setTimeout(r, 500)) // never hang Start
                 ]);
+            }
+            if (audioCtx.state === "running") {
+                // Make sure the currently selected sound is decoded before playing.
+                await getBuffer(selectedSoundId);
             }
             return audioCtx.state === "running";
         } catch (err) {
@@ -57,11 +65,25 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // Play one beep via Web Audio. Returns true if it played.
+    // Decode (and cache) a named sound; each sound is decoded at most once.
+    async function getBuffer(id) {
+        if (audioBuffers[id]) return audioBuffers[id];
+        const sound = SOUNDS[id];
+        if (!sound || !audioCtx) return null;
+        const res = await fetch(sound.src);
+        const arr = await res.arrayBuffer();
+        const buf = await audioCtx.decodeAudioData(arr);
+        audioBuffers[id] = buf;
+        return buf;
+    }
+
+    // Play the selected sound via Web Audio. Returns true if it played.
     function beepNow() {
-        if (!soundEnabled || !audioCtx || !audioBuffer) return false;
+        if (!soundEnabled) return false;
+        const buf = audioBuffers[selectedSoundId];
+        if (!audioCtx || !buf) return false;
         const src = audioCtx.createBufferSource();
-        src.buffer = audioBuffer;
+        src.buffer = buf;
         const gain = audioCtx.createGain();
         gain.gain.value = 1;
         src.connect(gain).connect(audioCtx.destination);
@@ -69,8 +91,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         return true;
     }
 
-    // Fallback beep via <audio> if Web Audio failed.
+    // Fallback beep via <audio> if Web Audio failed (plays the selected sound).
     function fallbackBeep() {
+        const sound = SOUNDS[selectedSoundId];
+        if (!sound) return;
+        beepSound.src = sound.src;
         beepSound.currentTime = 0;
         beepSound.play().catch(() => { /* silent */ });
     }
@@ -173,13 +198,42 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // ---- Sound toggle + test ----
+    // ---- Sound toggle + picker + test ----
     function setSound(on) {
         soundEnabled = on;
         soundToggle.textContent = on ? "🔊 Sound On" : "🔇 Sound Off";
         soundToggle.classList.toggle("muted", !on);
         if (!on) beepSound.pause();
         try { localStorage.setItem("stretch-sound", on ? "1" : "0"); } catch (e) { /* private mode */ }
+    }
+
+    // Select + persist the chosen sound (localStorage "stretch-sound-choice").
+    function selectSound(id) {
+        if (!SOUNDS[id]) return;
+        selectedSoundId = id;
+        try { localStorage.setItem("stretch-sound-choice", id); } catch (e) { /* private mode */ }
+        if (soundPicker) {
+            soundPicker.querySelectorAll(".sound-option").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.sound === id);
+            });
+        }
+    }
+
+    // Load persisted enabled-state + selected-sound preferences.
+    function loadSoundPreference() {
+        let enabled = true;
+        try { enabled = localStorage.getItem("stretch-sound") !== "0"; } catch (e) { enabled = true; }
+        soundEnabled = enabled;
+        soundToggle.textContent = enabled ? "🔊 Sound On" : "🔇 Sound Off";
+        soundToggle.classList.toggle("muted", !enabled);
+        let savedChoice = null;
+        try { savedChoice = localStorage.getItem("stretch-sound-choice"); } catch (e) { /* private mode */ }
+        selectedSoundId = (savedChoice && SOUNDS[savedChoice]) || DEFAULT_SOUND;
+        if (soundPicker) {
+            soundPicker.querySelectorAll(".sound-option").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.sound === selectedSoundId);
+            });
+        }
     }
 
     async function testSound() {
@@ -254,11 +308,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // Load saved sound preference.
-    try {
-        const saved = localStorage.getItem("stretch-sound");
-        if (saved !== null) setSound(saved === "1");
-    } catch (e) { /* private mode */ }
+    // Load saved sound + selected-sound preferences, then render.
+    loadSoundPreference();
+    try { beepSound.src = SOUNDS[selectedSoundId].src; } catch (e) { /* private mode */ }
+
+    // Sound picker wiring: choose + persist the sound used for interval-end cues.
+    if (soundPicker) {
+        soundPicker.querySelectorAll(".sound-option").forEach(btn => {
+            btn.addEventListener("click", () => {
+                selectSound(btn.dataset.sound);
+                // Pre-decode the newly selected sound (fire-and-forget).
+                if (audioCtx && audioCtx.state === "running") {
+                    getBuffer(btn.dataset.sound).catch(() => { /* best effort */ });
+                }
+            });
+        });
+    }
 
     renderTime();
 });

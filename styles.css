@@ -121,6 +121,36 @@ button:hover {
     opacity: 0.85;
 }
 
+/* Sound picker */
+.sound-picker {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 12px 0;
+}
+
+.sound-option {
+    font-size: 1rem;
+    padding: 8px 16px;
+    margin: 0;
+    background-color: #5c7a1f;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.sound-option:hover {
+    background-color: #46601a;
+    transform: translateY(-1px);
+}
+
+.sound-option.active {
+    background-color: #28a745;
+}
+
 /* Stretching GIF */
 #stretch-gif {
     width: 150px;
